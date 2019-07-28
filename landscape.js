@@ -9,15 +9,15 @@ const BOX = 16;
 const BOX2 = BOX / 2;
 
 const CONTOUR_HEIGHTS = [
-    [0.0, 0.05], 
-    [0.1, 0.15], 
-    [0.2, 0.25], 
-    [0.3, 0.35], 
-    [0.4, 0.45], 
-    [0.5, 0.55], 
-    [0.6, 0.65], 
-    [0.7, 0.75], 
-    [0.8, 0.85], 
+    [0.0, 0.05],
+    [0.1, 0.15],
+    [0.2, 0.25],
+    [0.3, 0.35],
+    [0.4, 0.45],
+    [0.5, 0.55],
+    [0.6, 0.65],
+    [0.7, 0.75],
+    [0.8, 0.85],
     [0.9, 0.95]
 ];
 
@@ -43,22 +43,22 @@ const inverseLerp = (a, b, target) => {
 
 const maskToLineSegments = (mask, p, lowerThreshold, upperThreshold) => {
   let maskAsBits = 0;
-  
+
   for (let i = 0; i < 4; i++){
-    maskAsBits |= (upperThreshold > mask[i] >= lowerThreshold) ? (1 << (3 - i)) : 0;   
+    maskAsBits |= (upperThreshold > mask[i] >= lowerThreshold) ? (1 << (3 - i)) : 0;
   }
-  
-  const topFrac = inverseLerp(mask[0], mask[1], upperThreshold);  
+
+  const topFrac = inverseLerp(mask[0], mask[1], upperThreshold);
   const bottomFrac = inverseLerp(mask[3], mask[2], upperThreshold);
-  const leftFrac =  inverseLerp(mask[0], mask[3], upperThreshold); 
+  const leftFrac =  inverseLerp(mask[0], mask[3], upperThreshold);
   const rightFrac = inverseLerp(mask[1], mask[2], upperThreshold);
-  
+
   const topPosition = {x: p.x - BOX2 + (BOX * topFrac), y: p.y - BOX2};
   const bottomPosition = {x: p.x - BOX2 + (BOX * bottomFrac), y: p.y + BOX2};
   const leftPosition = {x: p.x - BOX2, y: p.y - BOX2 + (BOX * leftFrac)};
   const rightPosition = {x: p.x + BOX2, y: p.y - BOX2 + (BOX * rightFrac)}
-  
-  // all relative to box center! 
+
+  // all relative to box center!
   switch(maskAsBits) {
     case 0:
     case 15:
@@ -74,9 +74,9 @@ const maskToLineSegments = (mask, p, lowerThreshold, upperThreshold) => {
       return [[leftPosition, rightPosition]];
     case 1:
     case 14:
-      // bottom-left corner -- 
+      // bottom-left corner --
       return [[bottomPosition, leftPosition]];
-    case 2: 
+    case 2:
     case 13:
       // bottom-right corner
       return [[bottomPosition, rightPosition]];
@@ -94,7 +94,7 @@ const maskToLineSegments = (mask, p, lowerThreshold, upperThreshold) => {
     case 10:
       // top-right + bottom-left
       return [[topPosition, rightPosition],[bottomPosition, leftPosition]];
-    default: 
+    default:
       return [];
   }
 }
@@ -130,7 +130,7 @@ class Box {
         this.sample(this.bottomLeft)
     ];
   }
-  
+
   draw (ctx) {
     this.contourIntervals.map((height, index) => {
       const lines = maskToLineSegments(this.mask, this.position, height[0], height[1]);
@@ -141,7 +141,8 @@ class Box {
 
 const drawLine = (ctx, start, end, index) => {
   ctx.save();
-  ctx.strokeStyle = `rgba(181, 101, 29, ${1.0 - (0.03 * index)})`;
+  ctx.strokeStyle = `rgba(181, 101, 29, ${1.0 - (0.09 * index)})`;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(start.x, start.y);
   ctx.lineTo(end.x, end.y);
@@ -151,8 +152,8 @@ const drawLine = (ctx, start, end, index) => {
 
 const boxes = [];
 
-for(let i = 0; i < document.body.clientWidth / BOX; i++){
-  for(let j = 0; j < document.body.clientHeight / BOX; j++){
+for(let i = 0; i < (document.body.clientWidth / BOX) + 1; i++){
+  for(let j = 0; j < (document.body.clientHeight / BOX) + 1; j++){
     boxes.push(new Box({
       x: i * BOX,
       y: j * BOX
@@ -165,6 +166,7 @@ const render = (dt) => {
   const f = Math.min(dt, 16) / 1000;
 
   boxes.map(b => {
+    b.position.y += 0.1;
     b.maskFromSample();
     b.draw(ctx);
   });

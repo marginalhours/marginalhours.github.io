@@ -1,4 +1,3 @@
-
 const width = 512;
 const height = 512;
 const size = 128;
@@ -21,7 +20,7 @@ const initializeGradients = () =>{
     perm[j] = x;
   }
 
-   // duplicate permutation for some reason? 
+   // duplicate permutation for some reason?
   for(let i = size; i < 2 * size; i++){
     perm[i] = perm[i - size];
   }
@@ -77,6 +76,6 @@ const fullNoise = (position, octaves) => {
     y *= 2.0;
     amplitude *= 0.5
   }
-  
+
   return result / total;
 }
